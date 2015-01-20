@@ -13,13 +13,16 @@ var PayPalPassport = function (env, config) {
         this.isLive = true;
     }
     this.environmentName = env;
+    this.config = config;
 
+    var self = this;
     this.strategy = new (PayPalPassport.Strategy)(envStrategyArgs(env, config),
         // Delay bind this function so that you can set saveToPersistentStore on your own OR in subclass proto.
         function (expressRequest, accessToken, refreshToken, profile, done) {
-            return this.saveToPersistentStore(expressRequest, accessToken, refreshToken, profile, done);
+            self.saveToPersistentStore(expressRequest, accessToken, refreshToken, profile, done);
         }
     );
+    passport.use(this.strategy);
 
     this.request = new Requestor(config);
 };
@@ -40,6 +43,43 @@ PayPalPassport.attachToKraken = function (app, done) {
             done(app);
         }
     });
+};
+
+PayPalPassport.setSerializers = function (serialize, deserialize) {
+    passport.serializeUser(serialize);
+    passport.deserializeUser(deserialize);
+}
+
+PayPalPassport.logout = function (req) {
+    delete req.session.returnUrl;
+    req.logout();
+};
+
+PayPalPassport.prototype.sendToPayPal = function (req, res, next) {
+    req.session.passportEnv = this.environmentName;
+    if (req.query.returnUrl || req.body.returnUrl) {
+        req.session.returnUrl = req.query.returnUrl || req.body.returnUrl;
+    }
+    passport.authenticate(this.environmentName, {
+        scope: this.config.scopes
+    })(req, res, next);
+};
+
+PayPalPassport.prototype.returnedFromPayPal = function (req, res, next) {
+    if (req.session.passportEnv !== this.environmentName) {
+        throw new Error('returnedFromPayPal called with a different environment than sendToPayPal');
+    }
+    var self = this;
+    passport.authenticate(this.environmentName, function(err, user, info) {
+        if (err) { return next(err); }
+        if (!user) {
+            res.redirect(self.failureRedirect);
+        }
+        req.logIn(user, function(err) {
+            if (err) { return next(err); }
+            res.redirect(req.session.returnUrl || '/');
+        });
+    })(req, res, next);
 };
 
 /**

@@ -2,7 +2,6 @@
 
 var wreck = require('wreck');
 var util = require('util');
-var uuid = require('uuid');
 var assert = require('assert');
 var log = require('pine')();
 var querystring = require('querystring');

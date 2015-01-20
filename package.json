@@ -26,6 +26,7 @@
   "homepage": "https://github.com/djMax/kraken-paypal-passport",
   "dependencies": {
     "debuglog": "^1.0.1",
+    "passport": "^0.2.1",
     "passport-oauth": "^1.0.0",
     "pine": "^1.1.0",
     "wreck": "^5.1.0"
