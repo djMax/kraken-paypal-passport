@@ -1,6 +1,6 @@
 {
   "name": "kraken-paypal-passport",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Simplifies using Passport-based authentication against PayPal in a Kraken.js application",
   "main": "index.js",
   "scripts": {

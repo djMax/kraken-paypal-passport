@@ -71,13 +71,19 @@ PayPalPassport.prototype.returnedFromPayPal = function (req, res, next) {
     }
     var self = this;
     passport.authenticate(this.environmentName, function(err, user, info) {
+        console.log('Logging in', err, user);
         if (err) { return next(err); }
         if (!user) {
             res.redirect(self.failureRedirect);
         }
         req.logIn(user, function(err) {
             if (err) { return next(err); }
-            res.redirect(req.session.returnUrl || '/');
+            var url = req.session.returnUrl;
+            delete req.session.returnUrl;
+            req.session.save(function onSave(error) {
+               if (error) { return next(error); }
+               return res.redirect(url || '/');
+            });
         });
     })(req, res, next);
 };
