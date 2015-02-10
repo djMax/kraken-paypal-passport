@@ -127,6 +127,7 @@ Strategy.prototype.userProfile = function (accessToken, done) {
 
             profile._raw = body;
             profile._json = json;
+            profile._payPal = t;
 
             t.completeUserProfile(accessToken, profile, done);
         } catch (e) {

@@ -71,7 +71,6 @@ PayPalPassport.prototype.returnedFromPayPal = function (req, res, next) {
     }
     var self = this;
     passport.authenticate(this.environmentName, function(err, user, info) {
-        console.log('Logging in', err, user);
         if (err) { return next(err); }
         if (!user) {
             res.redirect(self.failureRedirect);
